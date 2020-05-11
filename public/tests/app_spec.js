@@ -28,10 +28,40 @@ describe('LearnJS', function() {
     expect(learnjs.showView).toHaveBeenCalledWith(window.location.hash);
   })
 
-  describe('problem view', function(problemNumber) {
+  describe('problem view', function() {
     it('has a title that includes the problem number', function() {
       var view = learnjs.problemView('1');
-      expect(view.text()).toEqual('Problem #1 Coming soon!');
+      expect(view.find('.title').text()).toEqual('Problem #1');
+    });
+
+    it('shows the description', function() {
+      var view = learnjs.problemView('1');
+      expect(view.find('[data-name="description"]').text()).toEqual('What is truth?');
+    });
+
+    it('shows the problem code', function() {
+      var view = learnjs.problemView('1');
+      expect(view.find('[data-name="code"]').text()).toEqual('function problem() { return __; }');
+    });
+  })
+
+  describe('answer section', function() {
+    var view;
+    beforeEach(function() {
+      view = learnjs.problemView('1');
+    })
+
+    it('can check a correct answer by hitting button', function() {
+      view.find('.answer').val('true');
+      view.find('.check-btn').click();
+      var content = learnjs.buildCorrectFlash(1);
+      expect(view.find('.result').text()).toEqual(content.text());
+    });
+
+    it('rejects an incorrect answer', function() {
+      view.find('.answer').val('false');
+      view.find('.check-btn').click();
+      expect(view.find('.result').text()).toEqual('Incorrect!');
     });
   })
 });
