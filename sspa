@@ -151,6 +151,18 @@ cat <<DOC
 DOC
 }
 
+function create_cognito_stack() {
+  local client_id=$1
+  local stack_name="learnjs-cognito"
+  aws cloudformation create-stack \
+    --stack-name "${stack_name}" \
+    --template-body file://./cloudformation/cognito.yml \
+    --parameters ParameterKey=ClientId,ParameterValue=${client_id} \
+    --capabilities CAPABILITY_NAMED_IAM
+  aws cloudformation wait stack-create-complete \
+    --stack-name "${stack_name}"
+}
+
 function create_cognito_auth_role() {
   local identity_pool_dir=$1
   local pool_id=$(support/jsed.py ${identity_pool_dir}/pool_info.json 'IdentityPoolId')
@@ -304,7 +316,7 @@ function help() {
   echo "    liveserver"
   echo "    create_bucket <bucket name>"
   echo "    deploy_bucket <bucket name>"
-  echo "    create_pool <config dir>"
+  echo "    create_pool <client id>"
   echo "    create_table <config dir> <pool name>"
   echo "    test"
   echo "    build_bundle"
@@ -368,9 +380,11 @@ case "$action" in
   create_pool)
     check_aws
     if [[ $# -eq 2 ]]; then
-      create_identity_pool ${2}
+      create_cognito_stack ${2}
+      # create_identity_pool ${2}
     else
-      echo "Please specify a Cognito identity pool configuration directory"
+      echo "Please specify a Google Client ID"
+      # echo "Please specify a Cognito identity pool configuration directory"
       exit 1
     fi
     ;;
