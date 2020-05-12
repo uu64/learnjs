@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Parameters:
   ClientId:
     Type: String
+  DynamoDbTableArn:
+    Type: String
 Resources:
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
@@ -31,6 +33,26 @@ Resources:
                 "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
               "ForAnyValue:StringLike":
                 "cognito-identity.amazonaws.com:amr": "authenticated"
+      Policies:
+        - PolicyName: "learnjs_table_access"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "dynamodb:BatchGetItem"
+                  - "dynamodb:BatchWriteItem"
+                  - "dynamodb:DeleteItem"
+                  - "dynamodb:GetItem"
+                  - "dynamodb:PutItem"
+                  - "dynamodb:Query"
+                  - "dynamodb:UpdateItem"
+                Resource:
+                  - !Ref DynamoDbTableArn
+                Condition:
+                  ForAllValues:StringEquals:
+                    "dynamodb:LeadingKeys":
+                      - "${cognito-identity.amazonaws.com:sub}"
       RoleName: !Join [ '_', [ !GetAtt IdentityPool.Name, 'cognito', 'authenticated' ] ]
 Outputs:
   IdentityPoolId:

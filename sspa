@@ -205,6 +205,15 @@ function create_identity_pool() {
     --roles authenticated=${role_arn}
 }
 
+function create_dynamodb_stack() {
+  local stack_name="learnjs-dynamodb"
+  aws cloudformation create-stack \
+    --stack-name "${stack_name}" \
+    --template-body file://./cloudformation/dynamodb.yml
+  aws cloudformation wait stack-create-complete \
+    --stack-name "${stack_name}"
+}
+
 function create_table() {
   local table_dir=${1%/}
   local table_name=$(basename $table_dir)
@@ -317,7 +326,8 @@ function help() {
   echo "    create_bucket <bucket name>"
   echo "    deploy_bucket <bucket name>"
   echo "    create_pool <client id>"
-  echo "    create_table <config dir> <pool name>"
+  # echo "    create_table <config dir> <pool name>"
+  echo "    create_table"
   echo "    test"
   echo "    build_bundle"
   echo "    deploy_bundle"
@@ -391,12 +401,13 @@ case "$action" in
 
   create_table)
     check_aws
-    if [[ $# -eq 3 ]]; then
-      create_table ${2} ${3}
-    else
-      echo "Please specify a DynamoDB table configuration directory and identity pool name"
-      exit 1
-    fi
+    create_dynamodb_stack
+    # if [[ $# -eq 3 ]]; then
+    #   create_table ${2} ${3}
+    # else
+    #   echo "Please specify a DynamoDB table configuration directory and identity pool name"
+    #   exit 1
+    # fi
     ;;
 
   create_service)
