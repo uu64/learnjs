@@ -18,6 +18,6 @@ Resources:
         WriteCapacityUnits: "5"
       TableName: "learnjs"
 Outputs:
-  WebsiteURL:
+  DynamoDBTableArn:
     Value: !GetAtt DynamoDBTable.Arn
     Description: ARN of the DynamoDB Table
