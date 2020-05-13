@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "lambda.amazonaws.com"
+      AutoPublishAlias: "LearnJS"
+      CodeUri: "../services/dist/"
+      FunctionName: "popularAnswers"
+      Handler: "index.popularAnswers"
+      MemorySize: 512
+      Policies: AmazonDynamoDBFullAccess
+      Runtime: "nodejs12.x"
+      Timeout: 5
+      Events:
+        HttpPost:
+          Type: Api
+          Properties:
+            Path: "/popularAnswers"
+            Method: POST

@@ -244,17 +244,18 @@ function create_table() {
 function build_bundle() {
   check_node_deps
   pushd services
-  rm archive.zip
+  # rm archive.zip
+  rm -rf dist
   npm install || exit 1
   mkdir -p dist
   cp -r node_modules dist/
   cp -r lib/* dist/
   cd dist
   chmod -R a+r *
-  zip -r archive.zip *
-  mv archive.zip ..
-  cd ..
-  rm -rf dist
+  # zip -r archive.zip *
+  # mv archive.zip ..
+  # cd ..
+  # rm -rf dist
   popd
 }
 
@@ -275,6 +276,15 @@ function test_services() {
   export PATH=node_modules/.bin:${PATH}
   NODE_PATH=./lib jasmine
   cd ..
+}
+
+function create_lambda_stack() {
+  local stack_name="learnjs-lambda"
+  sam deploy \
+    --template-file cloudformation/lambda.sam.yml \
+    --s3-bucket learnjs-lambda \
+    --stack-name "${stack_name}" \
+    --capabilities CAPABILITY_NAMED_IAM
 }
 
 function create_iam_role() {
@@ -331,7 +341,8 @@ function help() {
   echo "    test"
   echo "    build_bundle"
   echo "    deploy_bundle"
-  echo "    create_service <config file>"
+  echo "    create_service"
+  # echo "    create_service <config file>"
   #echo "    create_gateway <config_file> <service> - Attach an API Gateway to a service"
   echo
 }
@@ -362,7 +373,8 @@ case "$action" in
   deploy_bundle)
     check_aws
     build_bundle
-    deploy_bundle
+    create_lambda_stack
+    # deploy_bundle
     ;;
 
   create_bucket)
@@ -412,13 +424,15 @@ case "$action" in
 
   create_service)
     check_aws
-    if [[ $# -eq 2 ]]; then
-      build_bundle
-      create_lambda_service ${2}
-    else
-      echo "Please specify a Lambda config directory"
-      exit 1
-    fi
+    build_bundle
+    create_lambda_stack
+    # if [[ $# -eq 2 ]]; then
+    #   build_bundle
+    #   create_lambda_service ${2}
+    # else
+    #   echo "Please specify a Lambda config directory"
+    #   exit 1
+    # fi
     ;;
 
   *)
