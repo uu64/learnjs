@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Resources:
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      TracingEnabled: True
   LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -25,3 +30,4 @@ Resources:
           Properties:
             Path: "/popularAnswers"
             Method: POST
+            RestApiId: !Ref ApiGateway
